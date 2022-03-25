@@ -11,7 +11,7 @@ class LSB():
         #super().__init__()
         self.bitsPerChar = 8 #8 bits per 1 char
         self.bitsPerPixel = 3 #can hide 3 bits per pixel
-        self.maxBitStuffing = 2
+        #self.maxBitStuffing = 2
         self.path_file_encode = None
         self.path_file_decode = None
         self.path_save_result = None
@@ -74,7 +74,8 @@ class LSB():
         #Each pixel can hide 3 bits, imageCapacity = the number of bits that an image can hide
         imageCapacity = width * height * self.bitsPerPixel
         #1 character is made up of 8 bits
-        messageCapacity = (len(message) * self.bitsPerChar) - (self.bitsPerChar + self.maxBitStuffing)
+        #messageCapacity = (len(message) * self.bitsPerChar) - (self.bitsPerChar + self.maxBitStuffing)
+        messageCapacity = (len(message) * self.bitsPerChar) 
         return imageCapacity >= messageCapacity
 
     #
@@ -83,12 +84,14 @@ class LSB():
         #then add 8 bit 0 to the end of list
         binaries = list("".join([bin(ord(i))[2:].rjust(self.bitsPerChar,'0') for i in message]) 
         + "".join(['0'] * self.bitsPerChar))
+        print(len(binaries))
         #add bit 0 to the end of list
         binaries = binaries + ['0'] * (len(binaries) % self.bitsPerPixel)
 
         #split the list with each element containing 3 consecutive bits
         binaries = [binaries[i*self.bitsPerPixel:i*self.bitsPerPixel+self.bitsPerPixel] 
         for i in range(0,int(len(binaries) / self.bitsPerPixel))]
+        print(binaries)
         return binaries
 
     #embed every bit of the message into every pixel of the image
@@ -139,9 +142,7 @@ class LSB():
     def getLSBsFromPixels(self, binaryPixels):
         totalZeros = 0
         binList = []
-        #Traverse each binary-converted R G B element of each pixel in the image, 
-        #if the last bit of each R G B element is bit 0, 
-        #we change it to 1, if it's equal to 1, we change it to 0
+        #Traverse each binary-converted R G B element of each pixel in the image
         for binaryPixel in binaryPixels:
                 for p in binaryPixel:
                         if p[-1] == '0':
@@ -167,7 +168,8 @@ class LSB():
         #Iterates from the first element to len(binList) minus the 8 extra 0's after the encoder at the top
         #Concatenate the bits and convert back to decimal value (int("".join(binList[i:i+self.bitsPerChar]),2)),
         #from decimal value to character by character by setting chr () to force style
-        message = "".join([chr(int("".join(binList[i:i+self.bitsPerChar]),2)) 
+        message = "".join([chr(int("".join(binList[i:i+self.bitsPerChar]),2))
+        #for i in range(0,len(binList), self.bitsPerChar)]) 
         for i in range(0,len(binList)-self.bitsPerChar,self.bitsPerChar)])
         return message
 
